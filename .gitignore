@@ -1,0 +1,4 @@
+*.o
+src/server
+src/client
+src/test_unit
