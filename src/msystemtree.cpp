@@ -5,6 +5,7 @@
 #include "msystemtree.hpp"
 #include "merror.hpp"
 #include "api.hpp"
+#include "mfilesystem.hpp"
 
 using namespace std;
 

@@ -5,6 +5,7 @@
 
 #include "mfilesystem.hpp"
 #include "merror.hpp"
+#include "mserver.hpp"
 
 using namespace std;
 
@@ -17,9 +18,10 @@ bool is_option_kw(string& arg)
     return arg[0] == '-';
 }
 
-mFileSystem::mFileSystem()
+mFileSystem::mFileSystem(mServer* owner)
 {
     this->systemtree = new mSystemTree();
+    this->owner = owner;
 }
 
 mFileSystem::~mFileSystem()
@@ -163,19 +165,9 @@ void mFileSystem::rm(vector<string>& argv, string& placeholder)
     }
 }
 
-void mFileSystem::rg(vector<string>& argv, string& placeholder)
-{
-    // string path = ".";
-    // if (argv.size() >= 1)
-    // {
-    //     path = argv[1];
-    // }
-    // this->systemtree->random_generate_file();
-}
-
 void mFileSystem::checkservers(vector<string>& argv, string& placeholder)
 {
-    
+    this->owner->hislaves(placeholder);
 }
 
 void mFileSystem::run_command_line(vector<string>& argv, string& placeholder)
@@ -220,10 +212,6 @@ void mFileSystem::run_command_line(vector<string>& argv, string& placeholder)
     else if (command == "rm")
     {
         this->rm(argv, placeholder);
-    }
-    else if (command == "rg")
-    {
-        this->rg(argv, placeholder);
     }
     else if (command == "checkservers")
     {

@@ -2,6 +2,7 @@
 #define MSYSTEMTREE_HPP
 
 #include "msystemtree.hpp"
+#include "mfilesystem.hpp"
 
 #include <vector>
 #include <string>
