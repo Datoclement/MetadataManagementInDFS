@@ -24,7 +24,7 @@ private:
 class mClientConnection
 {
 public:
-    mClientConnection(const char* hostname, int portno);
+    mClientConnection(const std::string& hostname, int portno);
     bool readin(std::string& line);
     bool writedown(const std::string& message);
     ~mClientConnection();

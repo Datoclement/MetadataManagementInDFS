@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
         error("Error usage %s hostname port");
     }
 
-    char* hostname = argv[1];
+    string hostname = string(argv[1]);
     int portno = atoi(argv[2]);
     mClientConnection con(hostname, portno);
     int sockfd = con.get_sockfd();
@@ -35,7 +35,6 @@ int main(int argc, char *argv[])
         printf("$ ");
         bzero(buffer,N);
         fgets(buffer,N-1,stdin);
-        cout << "test1" << endl;
         string line = string(buffer);
         vector<string> command;
         tokenize(line, command);
@@ -51,15 +50,12 @@ int main(int argc, char *argv[])
             }
             else
             {
-                cout << "test2" << endl;
                 string message(buffer);
-                cout << "test3" << endl;
                 if (!con.writedown(message))
                 {
 
                     con = mClientConnection(hostname, portno);
                 }
-                cout << "test3" << endl;
                 string line;
                 if (!con.readin(line))
                 {

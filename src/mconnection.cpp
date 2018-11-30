@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <arpa/inet.h>
 
 #include <iostream>
 #include "mconnection.hpp"
@@ -75,10 +76,10 @@ mServerConnection::~mServerConnection()
     close(this->sockfd);
 }
 
-mClientConnection::mClientConnection(const char* hostname, int portno)
+mClientConnection::mClientConnection(const std::string& hostname, int portno)
 {
     this->portno = portno;
-    this->server = gethostbyname(hostname);
+    this->server = gethostbyname(hostname.c_str());
     if (this->server == nullptr)
     {
         std::cout << "Error: fails to get the hostname." << std::endl;
