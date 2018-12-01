@@ -27,8 +27,7 @@ public:
 
     std::string summary()
     {
-        return std::to_string(id)+" "+std::to_string(parent)+" "+creation_time+" "
-        +lastmodify_time+std::to_string(size)+name+std::to_string(type);
+        return std::to_string(id) + " " + std::to_string(parent) + " " + creation_time + " " + lastmodify_time + " " + std::to_string(size) + " " + name + " " + std::to_string(type);
     }
 
 private:

@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
 
 using namespace std;
 
@@ -55,6 +56,11 @@ void mMetadataServer::run_command_line(const vector<string>& argv, string& place
     {
         placeholder = "Error: command " + command + " is not supported.\n";
     }
+    std::cout << "------map------" << std::endl;
+    for (auto it=metadata_map.begin();it!=metadata_map.end();it++)
+    {
+        std::cout << it->second->summary() << std::endl;
+    }
 }
 
 void mMetadataServer::request(const std::vector<std::string>& argv, std::string& placeholder)
@@ -68,11 +74,10 @@ void mMetadataServer::request(const std::vector<std::string>& argv, std::string&
     auto it = metadata_map.find(id);
     if (it == metadata_map.end())
     {
-        placeholder = "Error: request failed.\n";
+        placeholder = "Error: request failed.";
         return;
     }
     placeholder = it->second->summary();
-    placeholder = "Success";
 }
 
 void mMetadataServer::remove(const std::vector<std::string>& argv, std::string& placeholder)
@@ -80,7 +85,7 @@ void mMetadataServer::remove(const std::vector<std::string>& argv, std::string& 
     if (argv.size() != 2)
 
     {
-        placeholder = "Error: wrong argument number for delete.\n";
+        placeholder = "Error: wrong argument number for delete.";
         return;
     }
     int
@@ -89,7 +94,7 @@ void mMetadataServer::remove(const std::vector<std::string>& argv, std::string& 
     auto it = metadata_map.find(id);
     if (it == metadata_map.end())
     {
-        placeholder = "Error: delete failed.\n";
+        placeholder = "Error: delete failed.";
         return;
     }
     delete it->second;
@@ -101,7 +106,7 @@ void mMetadataServer::create(const std::vector<std::string>& argv, std::string& 
 {
     if (argv.size() != 8)
     {
-        placeholder = "Error: wrong argument number for delete.\n";
+        placeholder = "Error: wrong argument number for delete.";
         return;
     }
     int id = atoi(argv[1].c_str());
@@ -125,12 +130,12 @@ void mMetadataServer::create(const std::vector<std::string>& argv, std::string& 
 
 void mMetadataServer::update(const std::vector<std::string>& argv, std::string& placeholder)
 {
-    if ((argv.size() - 1) % 2 != 0)
+    if ((argv.size()) % 2 != 0)
     {
-        placeholder = "Error: uncomplete key value pairs.\n";
+        placeholder = "Error: incomplete key value pairs.";
         return;
     }
-    int id = atoi(argv[0].c_str());
+    int id = atoi(argv[1].c_str());
     auto it = metadata_map.find(id);
     if (it == metadata_map.end())
     {
@@ -138,7 +143,7 @@ void mMetadataServer::update(const std::vector<std::string>& argv, std::string& 
         return;
     }
     mMetadata* metadata = metadata_map[id];
-    for (int i = 1; i < argv.size(); i+=2)
+    for (int i = 2; i < argv.size(); i+=2)
     {
 
         if (argv[i] == "parent")

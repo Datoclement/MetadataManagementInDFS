@@ -170,7 +170,6 @@ void mServer::establish_service(int port, mSystem* sys)
 
 void mServer::sendto(const std::vector<int>& slaveids, const string& message, string& feedback)
 {
-    feedback = "";
     vector<string> responses;
     for (int i=0;i<slaveids.size();i++)
     {
@@ -191,7 +190,7 @@ void mServer::sendto(const std::vector<int>& slaveids, const string& message, st
         else
         {
             responses.push_back(line);
-            feedback += to_string(sid) + "-th slave " + slstr + " responds: " + line;
+            feedback += to_string(sid) + "-th slave " + slstr + " responds: " + line + "\n";
         }
     }
 }

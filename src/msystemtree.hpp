@@ -32,11 +32,11 @@ private:
         mNode(mSystemTree* mst, mNode* parent, const std::string name, const bool is_file, const int size, std::string& placeholder);
 
         mNode* const& addchild(const std::string& name, const bool is_file, const int size, std::string& placeholder);
-        void reattachto(mNode* new_parent);
-        void setname(const std::string& name);
-        void updatenothing();
-        void releasechild(int i);
-        void releasechild(mNode* ch);
+        void reattachto(mNode* new_parent, std::string& placeholder);
+        void setname(const std::string& name, std::string& placeholder);
+        void updatenothing(std::string& placeholder);
+        void releasechild(int i, std::string& placeholder);
+        void releasechild(mNode* ch, std::string& placeholder);
 
         void moveto(const std::string& name, mNode*& dest);
         int contain(const std::string& name) const;
@@ -67,6 +67,7 @@ private:
         void attachto(mNode* new_parent);
         void update();
         std::string creation_message() const;
+        std::string update_message(const std::string& key, const std::string& value) const;
         void systemcall(const std::string& message, std::string& placeholder) const;
     };
 
@@ -74,7 +75,7 @@ private:
     mNode* root;
     mNode* current_node;
     bool valid_path(const std::vector<std::string>& paths, mNode* src, mNode*& dest);
-    void recursive_clean_memory(mNode* node);
+    void recursive_clean_memory(mNode* node, std::string& placeholder);
     void recursive_list(const mNode* const node, std::vector<std::string>& collected, int offset);
     void dirpaths(const std::vector<std::string>& paths, std::vector<std::string>& pathholder);
     bool create_directory(const std::vector<std::string>& paths, mNode*& nodeholder, std::string& placeholder);

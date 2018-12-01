@@ -1,4 +1,4 @@
-CFLAG=-Wfatal-errors
+CFLAG=-Wfatal-errors -std=c++11
 
 all: c s
 
@@ -12,34 +12,34 @@ s: api.o mfilesystem.o server.o mconnection.o merror.o msystemtree.o goldenipcod
 	g++ ${CFLAG} -o server api.o mfilesystem.o server.o mconnection.o merror.o msystemtree.o goldenipcode.o mserver.o mmetadataserver.o
 
 client.o: client.cpp api.hpp mconnection.hpp merror.hpp
-	g++ ${CFLAG} -std=c++11 client.cpp -c -o client.o
+	g++ ${CFLAG} client.cpp -c -o client.o
 
 server.o: server.cpp api.hpp mfilesystem.hpp mconnection.hpp merror.hpp goldenipcode.hpp mserver.hpp
-	g++ ${CFLAG} -std=c++11 server.cpp -c -o server.o
+	g++ ${CFLAG} server.cpp -c -o server.o
 
 api.o: api.cpp api.hpp
-	g++ ${CFLAG} -std=c++11 api.cpp -c -o api.o
+	g++ ${CFLAG} api.cpp -c -o api.o
 
 mfilesystem.o: mfilesystem.cpp mfilesystem.hpp merror.hpp msystemtree.hpp mserver.hpp msystem.hpp
-	g++ ${CFLAG} -std=c++11 mfilesystem.cpp -c -o mfilesystem.o
+	g++ ${CFLAG} mfilesystem.cpp -c -o mfilesystem.o
 
 mconnection.o: mconnection.cpp mconnection.hpp merror.hpp
-	g++ ${CFLAG} -std=c++11 mconnection.cpp -c -o mconnection.o
+	g++ ${CFLAG} mconnection.cpp -c -o mconnection.o
 
 msystemtree.o: msystemtree.cpp msystemtree.hpp merror.hpp mfilesystem.hpp
-	g++ ${CFLAG} -std=c++11 msystemtree.cpp -c -o msystemtree.o
+	g++ ${CFLAG} msystemtree.cpp -c -o msystemtree.o
 
 merror.o: merror.cpp merror.hpp
-	g++ ${CFLAG} -std=c++11 merror.cpp -c -o merror.o
+	g++ ${CFLAG} merror.cpp -c -o merror.o
 
 mfilegenerator.o: mfilegenerator.cpp merror.hpp api.hpp
-	g++ ${CFLAG} -std=c++11 mfilegenerator.cpp -c -o mfilegenerator.o
+	g++ ${CFLAG} mfilegenerator.cpp -c -o mfilegenerator.o
 
 goldenipcode.o: goldenipcode.cpp goldenipcode.hpp
-	g++ ${CFLAG} -std=c++11 goldenipcode.cpp -c -o goldenipcode.o
+	g++ ${CFLAG} goldenipcode.cpp -c -o goldenipcode.o
 
 mserver.o: mserver.cpp mserver.hpp mmetadataserver.hpp mconnection.hpp api.hpp mfilesystem.hpp mmetadataserver.hpp
-	g++ ${CFLAG} -std=c++11 mserver.cpp -c -o mserver.o
+	g++ ${CFLAG} mserver.cpp -c -o mserver.o
 
-mmetadataserver.o: mmetadataserver.cpp mmetadataserver.hpp merror.hpp msystem.hpp
-	g++ ${CFLAG} -std=c++11 mmetadataserver.cpp -c -o mmetadataserver.o
+mmetadataserver.o: mmetadataserver.cpp mmetadataserver.hpp merror.hpp msystem.hpp mmetadata.hpp
+	g++ ${CFLAG} mmetadataserver.cpp -c -o mmetadataserver.o

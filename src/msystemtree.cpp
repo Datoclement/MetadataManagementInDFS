@@ -14,6 +14,20 @@ void ptokenize(const string& path, vector<string>& paths)
     tokenize(path, paths, "/");
 }
 
+string gettimestr()
+{
+    time_t this_moment = time(0);
+    string time_raw_str = string(ctime(&this_moment));
+    vector<string> time_tokens;
+    tokenize(time_raw_str, time_tokens);
+    string time_fine_str = time_tokens[0];
+    for (int i=1;i<time_tokens.size();i++)
+    {
+        time_fine_str += "-" + time_tokens[i];
+    }
+    return time_fine_str;
+}
+
 int mSystemTree::mNode::_node_count = 0;
 
 mSystemTree::mNode::mNode(mSystemTree* mst, bool is_file):
@@ -57,6 +71,7 @@ void mSystemTree::mNode::systemcall(const string& message, string& placeholder) 
     this->mst->mfs->owner->sendto(slaveids, message, placeholder);
 }
 
+
 string mSystemTree::mNode::creation_message() const
 {
     string str = "create ";
@@ -69,17 +84,9 @@ string mSystemTree::mNode::creation_message() const
     {
         str += to_string(this->_parent->object_id()) + " ";
     }
-    time_t this_moment = time(0);
-    string time_raw_str = string(ctime(&this_moment));
-    vector<string> time_tokens;
-    tokenize(time_raw_str, time_tokens);
-    string time_fine_str = time_tokens[0];
-    for (int i=1;i<time_tokens.size();i++)
-    {
-        time_fine_str += "-" + time_tokens[i];
-    }
-    str += time_fine_str + " ";
-    str += time_fine_str + " ";
+    string timestr = gettimestr();
+    str += timestr + " ";
+    str += timestr + " ";
     str += "0 ";
     str += this->_name + " ";
     str += string(this->_is_file?"1":"0") + " ";
@@ -177,11 +184,13 @@ bool mSystemTree::mNode::is_file() const
     return this->_is_file;
 }
 
-void mSystemTree::mNode::reattachto(mNode* new_parent)
+void mSystemTree::mNode::reattachto(mNode* new_parent, string& placeholder)
 {
     this->update();
     this->detach();
     this->attachto(new_parent);
+    string message = this->update_message("parent", to_string(new_parent->_object_id));
+    this->systemcall(message, placeholder);
 }
 
 mSystemTree::mNode* const& mSystemTree::mNode::addchild(const string& name, const bool is_file, const int size, string& placeholder)
@@ -196,35 +205,46 @@ mSystemTree::mNode* const& mSystemTree::mNode::addchild(const string& name, cons
     return this->_children.back();
 }
 
-void mSystemTree::mNode::setname(const string& name)
+void mSystemTree::mNode::setname(const string& name, string& placeholder)
 {
     this->update();
     this->_name = name;
+    string message = this->update_message("name", name);
+    this->systemcall(message, placeholder);
 }
 
-void mSystemTree::mNode::releasechild(int i)
+void mSystemTree::mNode::releasechild(int i, string& placeholder)
 {
     this->update();
+    string message = "delete " + to_string(this->_children[i]->_object_id);
+    this->_children[i]->systemcall(message, placeholder);
     delete this->_children[i];
     this->_children.erase(this->_children.begin()+i);
 }
 
-void mSystemTree::mNode::releasechild(mNode* ch)
+void mSystemTree::mNode::releasechild(mNode* ch, string& placeholder)
 {
     for (int i=0;i<this->_children.size();i++)
     {
         if (this->_children[i]->_object_id == ch->_object_id)
         {
-            this->releasechild(i);
+            this->releasechild(i, placeholder);
             return;
         }
     }
     error("Error: ch should always be a valid child of this. debug it.\n");
 }
 
-void mSystemTree::mNode::updatenothing()
+string mSystemTree::mNode::update_message(const string& key, const string& value) const
+{
+    return "update " + to_string(this->_object_id) + " " + key + " " + value;
+}
+
+void mSystemTree::mNode::updatenothing(string& placeholder)
 {
     this->update();
+    string timestr = gettimestr();
+    string message = this->update_message("lastmodified_time", timestr);
 }
 
 void mSystemTree::mNode::update()
@@ -375,7 +395,7 @@ void mSystemTree::move(const std::string& src, const std::string& dest, std::str
                 }
                 else
                 {
-                    src_node->reattachto(dest_node);
+                    src_node->reattachto(dest_node, placeholder);
                 }
             }
         }
@@ -385,8 +405,8 @@ void mSystemTree::move(const std::string& src, const std::string& dest, std::str
             this->dirpaths(dest_paths, dest_dirpaths);
             if(this->create_directory(dest_dirpaths, dest_node, placeholder))
             {
-                src_node->reattachto(dest_node);
-                src_node->setname(dest_paths.back());
+                src_node->reattachto(dest_node, placeholder);
+                src_node->setname(dest_paths.back(), placeholder);
             }
             else
             {
@@ -422,7 +442,7 @@ void mSystemTree::touch(const string& path, string& placeholder)
     mNode* dest_node = nullptr;
     if (this->valid_path(paths, this->current_node, dest_node))
     {
-        dest_node->updatenothing();
+        dest_node->updatenothing(placeholder);
     }
     else
     {
@@ -452,8 +472,8 @@ void mSystemTree::remov(const std::string& path, const bool recursive, std::stri
         }
         else if (node->is_file() || recursive)
         {
-            this->recursive_clean_memory(node);
-            node->parent()->releasechild(node);
+            this->recursive_clean_memory(node, placeholder);
+            node->parent()->releasechild(node, placeholder);
         }
         else
         {
@@ -498,12 +518,12 @@ void mSystemTree::recursive_list(const mNode* const node, vector<string>& collec
     }
 }
 
-void mSystemTree::recursive_clean_memory(mNode* node)
+void mSystemTree::recursive_clean_memory(mNode* node, string& placeholder)
 {
     for(int i=0;i<node->children().size();i++)
     {
-        recursive_clean_memory(node->children()[i]);
-        node->releasechild(i);
+        recursive_clean_memory(node->children()[i], placeholder);
+        node->releasechild(i, placeholder);
     }
 }
 
@@ -518,6 +538,7 @@ void mSystemTree::dirpaths(const vector<string>& paths, vector<string>& pathhold
 
 mSystemTree::~mSystemTree()
 {
-    this->recursive_clean_memory(this->root);
+    string msg;
+    this->recursive_clean_memory(this->root, msg);
     delete this->root;
 }
