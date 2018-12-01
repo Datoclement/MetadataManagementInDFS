@@ -49,20 +49,17 @@ void mServer::initialize_slave()
     std::string message(this->mIP + " " + std::to_string(this->minport));
     while (true)
     {
-        if (!con.writedown(message))
-        {
-            con = mClientConnection(this->MIP, this->Minport);
-            continue;
-        }
         std::string line;
-        if (!con.readin(line))
+        if (con.writedown(message) && con.readin(line))
+        {
+            this->slave_id = atoi(line.c_str());
+            std::cout << "I am now registered as the " + std::to_string(this->slave_id) + "-th slave of the master." << std::endl;
+            break;
+        }
+        else
         {
             con = mClientConnection(this->MIP, this->Minport);
-            continue;
         }
-        this->slave_id = atoi(line.c_str());
-        std::cout << "I am now registered as the " + std::to_string(this->slave_id) + "-th slave of the master." << std::endl;
-        break;
     }
     std::cout << "Ready to work!" << std::endl;
 }
@@ -106,20 +103,20 @@ void mServer::initialize_master()
         std::string line;
         while (true)
         {
-            if (!this->connections.back()->writedown(message)
-             || !this->connections.back()->readin(line))
+            if (this->connections.back()->writedown(message)
+             && this->connections.back()->readin(line))
+            {
+                break;
+            }
+            else
             {
                 delete this->connections[i];
                 this->connections[i] = new mClientConnection(ip, port);
             }
-            else
-            {
-                break;
-            }
         }
         std::cout << "Connection with " << ip << " " << port << " established." << std::endl;
     }
-    std::cout << "So we can begin to work now!" << std::endl;
+    std::cout << "We can begin to serve now!" << std::endl;
 }
 
 void mServer::run()
@@ -151,7 +148,6 @@ void mServer::establish_service(int port, mSystem* sys)
         {
             continue;
         }
-
         flush("inp: "+line);
 
         tokenize(line, argv);
@@ -177,20 +173,16 @@ void mServer::sendto(const std::vector<int>& slaveids, const string& message, st
         string slstr = this->slave_str(sid);
         string line;
         flush("out to " + slstr + ": " + message);
-        if (!this->connections[sid]->writedown(message))
-        {
-            flush("Error: connection to " + slstr + " is lost when writing to it.");
-            feedback += to_string(sid) + "-th slave " + slstr + " has lost the contact.\n";
-        }
-        else if (!this->connections[sid]->readin(line))
-        {
-            flush("Error: connection to " + slstr + " is lost when reading to it.");
-            feedback += to_string(sid) + "-th slave " + slstr + " has lost the contact.\n";
-        }
-        else
+        if (this->connections[sid]->writedown(message)
+         && this->connections[sid]->readin(line))
         {
             responses.push_back(line);
             feedback += to_string(sid) + "-th slave " + slstr + " responds: " + line + "\n";
+        }
+        else
+        {
+            flush("Error: connection to " + slstr + " is lost.");
+            feedback += to_string(sid) + "-th slave " + slstr + " has lost the contact.\n";
         }
     }
 }
@@ -199,21 +191,11 @@ void mServer::hislaves(std::string& placeholder)
 {
     for (int i=0;i<this->numslaves;i++)
     {
-        bool connected;
         std::string message = "hi";
         std::string line;
-        if (!this->connections[i]->writedown(message))
-        {
-            connected = false;
-        }
-        else if (!this->connections[i]->readin(line) || line != "hi")
-        {
-            connected = false;
-        }
-        else
-        {
-            connected = true;
-        }
+        bool connected = this->connections[i]->writedown(message)
+                      && this->connections[i]->readin(line)
+                      && line == "hi";
         placeholder += ( this->slave_str(i) + string(" is ") + string(connected?"yet":"not") + string(" connected\n") );
     }
 }
