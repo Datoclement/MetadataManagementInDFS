@@ -38,8 +38,11 @@ mfilegenerator.o: mfilegenerator.cpp merror.hpp api.hpp
 goldenipcode.o: goldenipcode.cpp goldenipcode.hpp
 	g++ ${CFLAG} goldenipcode.cpp -c -o goldenipcode.o
 
-mserver.o: mserver.cpp mserver.hpp mmetadataserver.hpp mconnection.hpp api.hpp mfilesystem.hpp mmetadataserver.hpp
+mserver.o: mserver.cpp mserver.hpp mmetadataserver.hpp mconnection.hpp api.hpp mfilesystem.hpp mmetadataserver.hpp merror.hpp
 	g++ ${CFLAG} mserver.cpp -c -o mserver.o
 
 mmetadataserver.o: mmetadataserver.cpp mmetadataserver.hpp merror.hpp msystem.hpp mmetadata.hpp
 	g++ ${CFLAG} mmetadataserver.cpp -c -o mmetadataserver.o
+
+clean: 
+	rm *.o client server

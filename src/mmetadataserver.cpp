@@ -116,8 +116,7 @@ void mMetadataServer::create(const std::vector<std::string>& argv, std::string& 
     size_t size = atoi(argv[5].c_str());
     const std::string& name = argv[6];
     const int type = atoi(argv[7].c_str());
-    mMetadata* new_metadata = new mMetadata(id, parent, creation_time, size,
-                                            lastmodify_time, name, type);
+    mMetadata* new_metadata = new mMetadata(id, parent, creation_time, size, lastmodify_time, name, type);
     auto it = metadata_map.find(id);
     if (it != metadata_map.end())
     {

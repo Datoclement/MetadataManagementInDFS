@@ -171,11 +171,16 @@ void mFileSystem::checkservers(const vector<string>& argv, string& placeholder)
     this->owner->hislaves(placeholder);
 }
 
+void mFileSystem::port(const vector<string>& argv, string& placeholder)
+{
+    this->owner->port_replacement(argv, placeholder);
+}
+
 void mFileSystem::run_command_line(const vector<string>& argv, string& placeholder)
 {
     if (argv.size() == 0)
     {
-        error("argv size should never be zero. debug it.\n");
+        error("Error: argv size should never be zero. debug it.\n");
     }
     const string& command = argv[0];
     if (command == "pwd")
@@ -217,6 +222,10 @@ void mFileSystem::run_command_line(const vector<string>& argv, string& placehold
     else if (command == "checkservers")
     {
         this->checkservers(argv, placeholder);
+    }
+    else if (command == "port")
+    {
+        this->port(argv, placeholder);
     }
     else
     {

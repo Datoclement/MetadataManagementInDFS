@@ -244,7 +244,8 @@ void mSystemTree::mNode::updatenothing(string& placeholder)
 {
     this->update();
     string timestr = gettimestr();
-    string message = this->update_message("lastmodified_time", timestr);
+    string message = this->update_message("lastmodify_time", timestr);
+    this->systemcall(message, placeholder);
 }
 
 void mSystemTree::mNode::update()

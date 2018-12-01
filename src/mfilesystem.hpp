@@ -33,6 +33,7 @@ private:
     void rm(const std::vector<std::string>& argv, std::string& placeholder);
     void touch(const std::vector<std::string>& argv, std::string& placeholder);
     void checkservers(const std::vector<std::string>& argv, std::string& placeholder);
+    void port(const std::vector<std::string>& argv, std::string& placeholder);
 };
 
 #endif

@@ -16,6 +16,7 @@ public:
     int accept_connection_request();
     bool readin(std::string& line);
     bool writedown(const std::string& message);
+    std::string get_client_ip_addr();
     ~mServerConnection();
 
 private:
@@ -25,6 +26,7 @@ private:
     socklen_t clilen;
     struct sockaddr_in serv_addr, cli_addr;
     struct sockaddr * client_addr;
+    std::string client_ip_address_str;
 };
 
 class mClientConnection

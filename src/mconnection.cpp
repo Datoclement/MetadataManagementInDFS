@@ -17,6 +17,26 @@ int fd_is_valid(int fd)
     return fcntl(fd, F_GETFD) != -1 || errno != EBADF;
 }
 
+void *get_in_addr(struct sockaddr *sa)
+{
+	if (sa->sa_family == AF_INET) {
+		return &(((struct sockaddr_in*)sa)->sin_addr);
+	}
+	return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
+
+std::string get_ip_addr_str(int ai_family, struct sockaddr *sa)
+{
+    char s[INET6_ADDRSTRLEN];
+    inet_ntop(ai_family, get_in_addr(sa), s, sizeof s);
+    return std::string(s);
+}
+
+std::string mServerConnection::get_client_ip_addr()
+{
+    return this->client_ip_address_str;
+}
+
 mServerConnection::mServerConnection(int portno)
 {
     signal(SIGPIPE, SIG_IGN);
@@ -50,6 +70,7 @@ mServerConnection::mServerConnection(int portno)
 int mServerConnection::accept_connection_request()
 {
     this->newsockfd = accept(this->sockfd, this->client_addr, &(this->clilen));
+    this->client_ip_address_str = get_ip_addr_str(AF_INET, this->client_addr);
     if (this->newsockfd < 0)
     {
         error("ERROR on accept");
@@ -82,7 +103,7 @@ bool mServerConnection::writedown(const std::string& message)
     int n = write(this->newsockfd, message.c_str(), message.size());
     if (n <= 0)
     {
-        std::cout << "socket connection stopped." << std::endl;
+        std::cout << "Error: socket connection stopped." << std::endl;
         this->accept_connection_request();
         return false;
     }
