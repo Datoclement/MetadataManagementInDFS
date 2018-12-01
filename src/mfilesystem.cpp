@@ -6,10 +6,11 @@
 #include "mfilesystem.hpp"
 #include "merror.hpp"
 #include "mserver.hpp"
+#include "msystem.hpp"
 
 using namespace std;
 
-bool is_option_kw(string& arg)
+bool is_option_kw(const string& arg)
 {
     if (arg.size() == 0)
     {
@@ -20,7 +21,7 @@ bool is_option_kw(string& arg)
 
 mFileSystem::mFileSystem(mServer* owner)
 {
-    this->systemtree = new mSystemTree();
+    this->systemtree = new mSystemTree(this);
     this->owner = owner;
 }
 
@@ -29,12 +30,12 @@ mFileSystem::~mFileSystem()
     delete this->systemtree;
 }
 
-void mFileSystem::pwd(vector<string>& argv, string& placeholder)
+void mFileSystem::pwd(const vector<string>& argv, string& placeholder)
 {
     this->systemtree->get_working_directory(placeholder);
 }
 
-void mFileSystem::mkdir(vector<string>& argv, string& placeholder)
+void mFileSystem::mkdir(const vector<string>& argv, string& placeholder)
 {
     if (argv.size() < 2)
     {
@@ -42,12 +43,12 @@ void mFileSystem::mkdir(vector<string>& argv, string& placeholder)
     }
     else
     {
-        string& name = argv[1];
+        const string& name = argv[1];
         this->systemtree->make_directory(name, placeholder);
     }
 }
 
-void mFileSystem::ls(vector<string>&argv, string& placeholder)
+void mFileSystem::ls(const vector<string>&argv, string& placeholder)
 {
     string src = ".";
     bool recursive = false;
@@ -74,7 +75,7 @@ void mFileSystem::ls(vector<string>&argv, string& placeholder)
     this->systemtree->list(src, recursive, placeholder);
 }
 
-void mFileSystem::readdir(vector<string>& argv, string& placeholder)
+void mFileSystem::readdir(const vector<string>& argv, string& placeholder)
 {
     string src = ".";
     if (argv.size() > 1)
@@ -84,7 +85,7 @@ void mFileSystem::readdir(vector<string>& argv, string& placeholder)
     this->systemtree->list(argv[1], false, placeholder);
 }
 
-void mFileSystem::cd(vector<string>& argv, string& placeholder)
+void mFileSystem::cd(const vector<string>& argv, string& placeholder)
 {
     if (argv.size() == 1)
     {
@@ -96,7 +97,7 @@ void mFileSystem::cd(vector<string>& argv, string& placeholder)
     }
 }
 
-void mFileSystem::mv(vector<string>& argv, string& placeholder)
+void mFileSystem::mv(const vector<string>& argv, string& placeholder)
 {
     if (argv.size() < 3)
     {
@@ -108,7 +109,7 @@ void mFileSystem::mv(vector<string>& argv, string& placeholder)
     }
 }
 
-void mFileSystem::stat(vector<string>& argv, string& placeholder)
+void mFileSystem::stat(const vector<string>& argv, string& placeholder)
 {
     if (argv.size() == 1)
     {
@@ -120,7 +121,7 @@ void mFileSystem::stat(vector<string>& argv, string& placeholder)
     }
 }
 
-void mFileSystem::touch(vector<string>& argv, string& placeholder)
+void mFileSystem::touch(const vector<string>& argv, string& placeholder)
 {
     if (argv.size() == 1)
     {
@@ -132,7 +133,7 @@ void mFileSystem::touch(vector<string>& argv, string& placeholder)
     }
 }
 
-void mFileSystem::rm(vector<string>& argv, string& placeholder)
+void mFileSystem::rm(const vector<string>& argv, string& placeholder)
 {
     string src = "";
     bool recursive = false;
@@ -165,18 +166,18 @@ void mFileSystem::rm(vector<string>& argv, string& placeholder)
     }
 }
 
-void mFileSystem::checkservers(vector<string>& argv, string& placeholder)
+void mFileSystem::checkservers(const vector<string>& argv, string& placeholder)
 {
     this->owner->hislaves(placeholder);
 }
 
-void mFileSystem::run_command_line(vector<string>& argv, string& placeholder)
+void mFileSystem::run_command_line(const vector<string>& argv, string& placeholder)
 {
     if (argv.size() == 0)
     {
         error("argv size should never be zero. debug it.\n");
     }
-    string& command = argv[0];
+    const string& command = argv[0];
     if (command == "pwd")
     {
         this->pwd(argv, placeholder);

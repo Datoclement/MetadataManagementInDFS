@@ -8,28 +8,31 @@
 
 #include "msystemtree.hpp"
 #include "mserver.hpp"
+#include "msystem.hpp"
 
-class mFileSystem
+class mSystemTree;
+
+class mFileSystem : public mSystem
 {
 public:
     mFileSystem(mServer* owner);
+    void run_command_line(const std::vector<std::string>& argv, std::string& placeholder);
     ~mFileSystem();
-    void run_command_line(std::vector<std::string>& argv, std::string& placeholder);
 
 private:
     mServer* owner;
     mSystemTree* systemtree;
 
-    void pwd(std::vector<std::string>& argv, std::string& placeholder);
-    void mkdir(std::vector<std::string>& argv, std::string& placeholder);
-    void ls(std::vector<std::string>& argv, std::string& placeholder);
-    void readdir(std::vector<std::string>& argv, std::string& placeholder);
-    void cd(std::vector<std::string>& argv, std::string& placeholder);
-    void mv(std::vector<std::string>& argv, std::string& placeholder);
-    void stat(std::vector<std::string>& argv, std::string& placeholder);
-    void rm(std::vector<std::string>& argv, std::string& placeholder);
-    void touch(std::vector<std::string>& argv, std::string& placeholder);
-    void checkservers(std::vector<std::string>& argv, std::string& placeholder);
+    void pwd(const std::vector<std::string>& argv, std::string& placeholder);
+    void mkdir(const std::vector<std::string>& argv, std::string& placeholder);
+    void ls(const std::vector<std::string>& argv, std::string& placeholder);
+    void readdir(const std::vector<std::string>& argv, std::string& placeholder);
+    void cd(const std::vector<std::string>& argv, std::string& placeholder);
+    void mv(const std::vector<std::string>& argv, std::string& placeholder);
+    void stat(const std::vector<std::string>& argv, std::string& placeholder);
+    void rm(const std::vector<std::string>& argv, std::string& placeholder);
+    void touch(const std::vector<std::string>& argv, std::string& placeholder);
+    void checkservers(const std::vector<std::string>& argv, std::string& placeholder);
 };
 
 #endif

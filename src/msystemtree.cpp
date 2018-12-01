@@ -16,7 +16,8 @@ void ptokenize(const string& path, vector<string>& paths)
 
 int mSystemTree::mNode::_node_count = 0;
 
-mSystemTree::mNode::mNode(const bool is_file):
+mSystemTree::mNode::mNode(mSystemTree* mst, bool is_file):
+    mst(mst),
     _object_id(mNode::_node_count++),
     _is_file(is_file),
     _creation_time(time(0))
@@ -24,15 +25,15 @@ mSystemTree::mNode::mNode(const bool is_file):
     this->_modification_time = this->_creation_time;
 }
 
-mSystemTree::mNode::mNode():
-    mNode(false)
+mSystemTree::mNode::mNode(mSystemTree* mst):
+    mNode(mst, false)
 {
     this->_parent = nullptr;
     this->_name = "~";
 }
 
-mSystemTree::mNode::mNode(mNode* parent, const string name, const bool is_file, const int size):
-    mNode(is_file)
+mSystemTree::mNode::mNode(mSystemTree* mst, mNode* parent, const string name, const bool is_file, const int size):
+    mNode(mst, is_file)
 {
     if (parent == nullptr)
     {
@@ -56,7 +57,7 @@ const vector<mSystemTree::mNode*>& mSystemTree::mNode::children() const
     return this->_children;
 }
 
-int mSystemTree::mNode::contain(const string& name)
+int mSystemTree::mNode::contain(const string& name) const
 {
     int len = this->_children.size();
     for (int i=0;i<len;i++)
@@ -93,9 +94,10 @@ void mSystemTree::mNode::moveto(const string& name, mNode*& dest)
     }
 }
 
-mSystemTree::mSystemTree()
+mSystemTree::mSystemTree(mFileSystem* mfs):
+    mfs(mfs)
 {
-    this->root = new mNode();
+    this->root = new mNode(this);
     this->current_node = this->root;
 }
 
@@ -146,7 +148,7 @@ mSystemTree::mNode* const& mSystemTree::mNode::addchild(const string& name, cons
         error("Error: this should never be a file. debug it.\n");
     }
     this->update();
-    mNode* child = new mNode(this, name, is_file, size);
+    mNode* child = new mNode(this->mst, this, name, is_file, size);
     this->_children.push_back(child);
     return this->_children.back();
 }
@@ -161,6 +163,20 @@ void mSystemTree::mNode::releasechild(int i)
 {
     this->update();
     delete this->_children[i];
+    this->_children.erase(this->_children.begin()+i);
+}
+
+void mSystemTree::mNode::releasechild(mNode* ch)
+{
+    for (int i=0;i<this->_children.size();i++)
+    {
+        if (this->_children[i]->_object_id == ch->_object_id)
+        {
+            this->releasechild(i);
+            return;
+        }
+    }
+    error("Error: ch should always be a valid child of this. debug it.\n");
 }
 
 void mSystemTree::mNode::updatenothing()
@@ -178,7 +194,7 @@ const int mSystemTree::mNode::object_id() const
     return this->_object_id;
 }
 
-string mSystemTree::mNode::asstring()
+string mSystemTree::mNode::asstring() const
 {
     string str;
     str += "object id: " + to_string(this->_object_id) + "\n";
@@ -187,45 +203,6 @@ string mSystemTree::mNode::asstring()
     str += "type: " + string(this->_is_file?"file":"directory") + "\n";
     str += "size: " + to_string(this->_size) + "\n";
     return str;
-}
-
-void mSystemTree::mNode::remov(const int obj_id)
-{
-    mNode* deleted_node = nullptr;
-    int num_children = this->_children.size();
-    for (int i=0;i<num_children;i++)
-    {
-        if (obj_id == this->_children[i]->_object_id)
-        {
-            deleted_node = this->_children[i];
-        }
-    }
-    if (deleted_node == nullptr)
-    {
-        error("Error: deleted_node should never be nullptr. debug it.\n");
-    }
-    else
-    {
-        deleted_node->disappear();
-    }
-}
-
-void mSystemTree::mNode::disappear()
-{
-    this->update();
-    this->detach();
-    if (this->_is_file)
-    {
-        cout << "maybe need to call the metadata server to delete myself." << endl;
-    }
-    else
-    {
-        int num_children = this->_children.size();
-        for (int i=0;i<num_children;i++)
-        {
-            this->_children[i]->disappear();
-        }
-    }
 }
 
 void mSystemTree::get_working_directory(string& placeholder)
@@ -437,7 +414,8 @@ void mSystemTree::remov(const std::string& path, const bool recursive, std::stri
         }
         else if (node->is_file() || recursive)
         {
-            node->parent()->remov(node->object_id());
+            this->recursive_clean_memory(node);
+            node->parent()->releasechild(node);
         }
         else
         {

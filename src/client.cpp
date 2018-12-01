@@ -28,7 +28,6 @@ int main(int argc, char *argv[])
     int portno = atoi(argv[2]);
     mClientConnection con(hostname, portno);
     int sockfd = con.get_sockfd();
-
     char buffer[N];
     while (true)
     {
@@ -53,13 +52,14 @@ int main(int argc, char *argv[])
                 string message(buffer);
                 if (!con.writedown(message))
                 {
-
                     con = mClientConnection(hostname, portno);
+                    continue;
                 }
                 string line;
                 if (!con.readin(line))
                 {
                     con = mClientConnection(hostname, portno);
+                    continue;
                 }
                 if (line != "<no output>\n")
                 {

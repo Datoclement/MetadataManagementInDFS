@@ -2,15 +2,17 @@
 #define MSYSTEMTREE_HPP
 
 #include "msystemtree.hpp"
-// #include "mfilesystem.hpp"
+#include "mfilesystem.hpp"
 
 #include <vector>
 #include <string>
 
+class mFileSystem;
+
 class mSystemTree
 {
 public:
-    mSystemTree();
+    mSystemTree(mFileSystem* mfs);
     ~mSystemTree();
     void get_working_directory(std::string& placeholder);
     void make_directory(const std::string& path, std::string& placeholder);
@@ -26,27 +28,30 @@ private:
     {
     public:
 
-        mNode();
-        mNode(mNode* parent, const std::string name, const bool is_file=false, const int size=0);
+        mNode(mSystemTree* mst);
+        mNode(mSystemTree* mst, mNode* parent, const std::string name, const bool is_file=false, const int size=0);
+
+        mNode* const& addchild(const std::string& name, const bool is_file=false, const int size=0);
+        void reattachto(mNode* new_parent);
+        void setname(const std::string& name);
+        void updatenothing();
+        void releasechild(int i);
+        void releasechild(mNode* ch);
+
         void moveto(const std::string& name, mNode*& dest);
-        int contain(const std::string& name);
+        int contain(const std::string& name) const;
         const std::string& name() const;
         mNode* const& parent() const;
         const std::vector<mNode*>& children() const;
-        mNode* const& addchild(const std::string& name, const bool is_file=false, const int size=0);
         const int object_id() const;
         bool is_file() const;
-        void reattachto(mNode* new_parent);
-        void setname(const std::string& name);
-        void releasechild(int i);
-        std::string asstring();
-        void updatenothing();
-        void remov(const int obj_id);
+        std::string asstring() const;
 
     private:
 
         static int _node_count;
 
+        mSystemTree* const mst;
         const int _object_id;
         const time_t _creation_time;
         int _size;
@@ -57,13 +62,13 @@ private:
         mNode* _parent;
         std::vector<mNode*> _children;
 
-        mNode(const bool is_file);
+        mNode(mSystemTree* mst, bool is_file);
         void detach();
         void attachto(mNode* new_parent);
         void update();
-        void disappear();
     };
 
+    mFileSystem* mfs;
     mNode* root;
     mNode* current_node;
     bool valid_path(const std::vector<std::string>& paths, mNode* src, mNode*& dest);

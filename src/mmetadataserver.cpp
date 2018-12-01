@@ -1,5 +1,6 @@
 #include "mmetadataserver.hpp"
 #include "merror.hpp"
+#include "msystem.hpp"
 
 #include <vector>
 #include <string>

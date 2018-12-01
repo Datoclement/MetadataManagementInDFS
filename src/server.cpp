@@ -20,7 +20,7 @@
 int main(int argc, char *argv[])
 {
     // master information
-    const std::string mastername = "192.168.1.162";
+    const std::string mastername = "192.168.1.164";
     const int inport = 4444;
     const int outport = 5555;
     const int numslaves = 2;

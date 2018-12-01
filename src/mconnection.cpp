@@ -20,24 +20,31 @@ int fd_is_valid(int fd)
 mServerConnection::mServerConnection(int portno)
 {
     signal(SIGPIPE, SIG_IGN);
-    this->sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (this->sockfd < 0)
+    std::cout << "Establishing service on port " << portno << std::endl;
+    while (true)
     {
-        error("ERROR opening socket");
+        this->sockfd = socket(AF_INET, SOCK_STREAM, 0);
+        if (this->sockfd < 0)
+        {
+            continue;
+        }
+
+        bzero((char *) &(this->serv_addr), sizeof(this->serv_addr));
+        this->portno = portno;
+        this->serv_addr.sin_family = AF_INET;
+        this->serv_addr.sin_addr.s_addr = INADDR_ANY;
+        this->serv_addr.sin_port = htons(portno);
+        if (bind(this->sockfd, (struct sockaddr *) &(this->serv_addr), sizeof(this->serv_addr)) < 0)
+        {
+            continue;
+        }
+        listen(this->sockfd, 5);
+        this->clilen = sizeof(this->cli_addr);
+        this->client_addr = (struct sockaddr *) &(this->cli_addr);
+        break;
     }
 
-    bzero((char *) &(this->serv_addr), sizeof(this->serv_addr));
-    this->portno = portno;
-    this->serv_addr.sin_family = AF_INET;
-    this->serv_addr.sin_addr.s_addr = INADDR_ANY;
-    this->serv_addr.sin_port = htons(portno);
-    if (bind(this->sockfd, (struct sockaddr *) &(this->serv_addr), sizeof(this->serv_addr)) < 0)
-    {
-        error("ERROR on binding");
-    }
-    listen(this->sockfd, 5);
-    this->clilen = sizeof(this->cli_addr);
-    this->client_addr = (struct sockaddr *) &(this->cli_addr);
+    std::cout << "Service established." << std::endl;
 }
 
 int mServerConnection::accept_connection_request()

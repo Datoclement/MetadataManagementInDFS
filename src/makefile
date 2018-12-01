@@ -20,7 +20,7 @@ server.o: server.cpp api.hpp mfilesystem.hpp mconnection.hpp merror.hpp goldenip
 api.o: api.cpp api.hpp
 	g++ ${CFLAG} -std=c++11 api.cpp -c -o api.o
 
-mfilesystem.o: mfilesystem.cpp mfilesystem.hpp merror.hpp msystemtree.hpp mserver.hpp
+mfilesystem.o: mfilesystem.cpp mfilesystem.hpp merror.hpp msystemtree.hpp mserver.hpp msystem.hpp
 	g++ ${CFLAG} -std=c++11 mfilesystem.cpp -c -o mfilesystem.o
 
 mconnection.o: mconnection.cpp mconnection.hpp merror.hpp
@@ -41,5 +41,5 @@ goldenipcode.o: goldenipcode.cpp goldenipcode.hpp
 mserver.o: mserver.cpp mserver.hpp mmetadataserver.hpp mconnection.hpp api.hpp mfilesystem.hpp mmetadataserver.hpp
 	g++ ${CFLAG} -std=c++11 mserver.cpp -c -o mserver.o
 
-mmetadataserver.o: mmetadataserver.cpp mmetadataserver.hpp merror.hpp
+mmetadataserver.o: mmetadataserver.cpp mmetadataserver.hpp merror.hpp msystem.hpp
 	g++ ${CFLAG} -std=c++11 mmetadataserver.cpp -c -o mmetadataserver.o

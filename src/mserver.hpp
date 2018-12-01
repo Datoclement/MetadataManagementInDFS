@@ -4,6 +4,13 @@
 #include <string>
 #include <vector>
 
+#include "mconnection.hpp"
+#include "msystem.hpp"
+
+// ^^^^TODO
+// make master server maintaining a list of connection with slaves
+// make an interface to facilitate the one-time send message
+
 class mServer
 {
 public:
@@ -17,6 +24,7 @@ public:
         int numslaves);
     void run();
     void hislaves(std::string& placeholder);
+    void sendto(const std::vector<int>& slaveids, const std::string& message, std::string& feedback);
 
 private:
     const std::string mIP;
@@ -29,11 +37,12 @@ private:
     bool is_master;
     bool slave_id;
     std::vector<std::vector<std::string> > slave_table;
+    std::vector<mClientConnection*> connections;
 
     void initialize_master();
     void initialize_slave();
-    void run_master();
-    void run_slave();
+    void establish_service(int port, mSystem* msystem);
+    std::string slave_str(int id);
 };
 
 #endif
