@@ -32,7 +32,7 @@ mSystemTree::mNode::mNode(mSystemTree* mst):
     this->_name = "~";
 }
 
-mSystemTree::mNode::mNode(mSystemTree* mst, mNode* parent, const string name, const bool is_file, const int size):
+mSystemTree::mNode::mNode(mSystemTree* mst, mNode* parent, const string name, const bool is_file, const int size, string& placeholder):
     mNode(mst, is_file)
 {
     if (parent == nullptr)
@@ -42,6 +42,48 @@ mSystemTree::mNode::mNode(mSystemTree* mst, mNode* parent, const string name, co
     this->_parent = parent;
     this->_name = name;
     this->_size = size;
+    this->systemcall(this->creation_message(), placeholder);
+}
+
+void mSystemTree::mNode::systemcall(const string&& message, string& placeholder)
+{
+    if (this->_object_id == 0)
+    {
+        error("Error: the root has no relation to metadata target server.\n");
+    }
+    vector<int> slaveids;
+    this->mst->mfs->owner->slavehash(this->_object_id, slaveids);
+    this->mst->mfs->owner->sendto(slaveids, message, placeholder);
+}
+
+string mSystemTree::mNode::creation_message() const
+{
+    string str = "create ";
+    str += to_string(this->_object_id) + " ";
+    if (this->_parent == nullptr)
+    {
+        str += "-1 ";
+    }
+    else
+    {
+        str += to_string(this->_parent->object_id()) + " ";
+    }
+    time_t this_moment = time(0);
+    string time_raw_str = string(ctime(&this_moment));
+    vector<string> time_tokens;
+    tokenize(time_raw_str, time_tokens);
+    string time_fine_str = time_tokens[0];
+    for (int i=1;i<time_tokens.size();i++)
+    {
+        time_fine_str += "-" + time_tokens[i];
+    }
+    str += time_fine_str + " ";
+    str += time_fine_str + " ";
+    str += "0 ";
+    str += this->_name + " ";
+    str += string(this->_is_file?"1":"0") + " ";
+
+    return str;
 }
 
 const string& mSystemTree::mNode::name() const
@@ -141,14 +183,14 @@ void mSystemTree::mNode::reattachto(mNode* new_parent)
     this->attachto(new_parent);
 }
 
-mSystemTree::mNode* const& mSystemTree::mNode::addchild(const string& name, const bool is_file, const int size)
+mSystemTree::mNode* const& mSystemTree::mNode::addchild(const string& name, const bool is_file, const int size, string& placeholder)
 {
     if (this->_is_file)
     {
         error("Error: this should never be a file. debug it.\n");
     }
     this->update();
-    mNode* child = new mNode(this->mst, this, name, is_file, size);
+    mNode* child = new mNode(this->mst, this, name, is_file, size, placeholder);
     this->_children.push_back(child);
     return this->_children.back();
 }
@@ -229,13 +271,13 @@ void mSystemTree::make_directory(const string& path, string& placeholder)
     vector<string> paths;
     ptokenize(path, paths);
     mNode* nodeholder = nullptr;
-    if (!this->create_directory(paths, nodeholder))
+    if (!this->create_directory(paths, nodeholder, placeholder))
     {
         placeholder = "Error: " + path + " is impossible because it passes by some file.\n";
     }
 }
 
-bool mSystemTree::create_directory(const vector<string>& paths, mNode*& nodeholder)
+bool mSystemTree::create_directory(const vector<string>& paths, mNode*& nodeholder, string& placeholder)
 {
     int len_paths = paths.size();
     mNode* local_node = this->current_node;
@@ -251,7 +293,7 @@ bool mSystemTree::create_directory(const vector<string>& paths, mNode*& nodehold
             local_node->moveto(paths[i], tmp_node);
             if (tmp_node == nullptr)
             {
-                tmp_node = local_node->addchild(paths[i]);
+                tmp_node = local_node->addchild(paths[i], false, 0, placeholder);
             }
             local_node = tmp_node;
         }
@@ -345,7 +387,7 @@ void mSystemTree::move(const std::string& src, const std::string& dest, std::str
         {
             vector<string> dest_dirpaths;
             this->dirpaths(dest_paths, dest_dirpaths);
-            if(this->create_directory(dest_dirpaths, dest_node))
+            if(this->create_directory(dest_dirpaths, dest_node, placeholder))
             {
                 src_node->reattachto(dest_node);
                 src_node->setname(dest_paths.back());
@@ -390,9 +432,9 @@ void mSystemTree::touch(const string& path, string& placeholder)
     {
         vector<string> dirpaths;
         this->dirpaths(paths, dirpaths);
-        if(this->create_directory(dirpaths, dest_node))
+        if(this->create_directory(dirpaths, dest_node, placeholder))
         {
-            dest_node->addchild(paths.back(), true, 0);
+            dest_node->addchild(paths.back(), true, 0, placeholder);
         }
         else
         {

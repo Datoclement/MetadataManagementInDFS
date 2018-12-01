@@ -25,6 +25,7 @@ public:
     void run();
     void hislaves(std::string& placeholder);
     void sendto(const std::vector<int>& slaveids, const std::string& message, std::string& feedback);
+    void slavehash(int identifier, std::vector<int>& slaveholder);
 
 private:
     const std::string mIP;

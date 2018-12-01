@@ -12,7 +12,11 @@ using namespace std;
 
 void flush(const string& msg)
 {
-    std::cout << msg << std::endl;
+    std::cout << msg;
+    if (msg.size()==0 || msg.back()!='\n')
+    {
+        std::cout << std::endl;
+    }
     std::cout.flush();
 }
 
@@ -99,9 +103,11 @@ void mServer::initialize_master()
         int port = atoi(this->slave_table[i][1].c_str());
         this->connections.push_back(new mClientConnection(ip, port));
         std::string message = "hi";
+        std::string line;
         while (true)
         {
-            if (!this->connections.back()->writedown(message))
+            if (!this->connections.back()->writedown(message)
+             || !this->connections.back()->readin(line))
             {
                 delete this->connections[i];
                 this->connections[i] = new mClientConnection(ip, port);
@@ -134,7 +140,6 @@ void mServer::establish_service(int port, mSystem* sys)
 {
     mServerConnection con(port);
     con.accept_connection_request();
-    flush("test");
     while (true)
     {
 
@@ -147,7 +152,7 @@ void mServer::establish_service(int port, mSystem* sys)
             continue;
         }
 
-        flush("inp "+line);
+        flush("inp: "+line);
 
         tokenize(line, argv);
         sys->run_command_line(argv, message);
@@ -172,12 +177,13 @@ void mServer::sendto(const std::vector<int>& slaveids, const string& message, st
         int sid = slaveids[i];
         string slstr = this->slave_str(sid);
         string line;
+        flush("out to " + slstr + ": " + message);
         if (!this->connections[sid]->writedown(message))
         {
             flush("Error: connection to " + slstr + " is lost when writing to it.");
             feedback += to_string(sid) + "-th slave " + slstr + " has lost the contact.\n";
         }
-        else if (!this->connections[i]->readin(line))
+        else if (!this->connections[sid]->readin(line))
         {
             flush("Error: connection to " + slstr + " is lost when reading to it.");
             feedback += to_string(sid) + "-th slave " + slstr + " has lost the contact.\n";
@@ -185,7 +191,7 @@ void mServer::sendto(const std::vector<int>& slaveids, const string& message, st
         else
         {
             responses.push_back(line);
-            feedback += to_string(sid) + "-th slave " + slstr + "responds: " + line;
+            feedback += to_string(sid) + "-th slave " + slstr + " responds: " + line;
         }
     }
 }
@@ -216,4 +222,10 @@ void mServer::hislaves(std::string& placeholder)
 string mServer::slave_str(int id)
 {
     return this->slave_table[id][0] + " " + this->slave_table[id][1];
+}
+
+void mServer::slavehash(int identifier, std::vector<int>& slaveholder)
+{
+    int residu = identifier % this->numslaves;
+    slaveholder.push_back(residu);
 }

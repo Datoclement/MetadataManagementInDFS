@@ -29,9 +29,9 @@ private:
     public:
 
         mNode(mSystemTree* mst);
-        mNode(mSystemTree* mst, mNode* parent, const std::string name, const bool is_file=false, const int size=0);
+        mNode(mSystemTree* mst, mNode* parent, const std::string name, const bool is_file, const int size, std::string& placeholder);
 
-        mNode* const& addchild(const std::string& name, const bool is_file=false, const int size=0);
+        mNode* const& addchild(const std::string& name, const bool is_file, const int size, std::string& placeholder);
         void reattachto(mNode* new_parent);
         void setname(const std::string& name);
         void updatenothing();
@@ -66,6 +66,8 @@ private:
         void detach();
         void attachto(mNode* new_parent);
         void update();
+        std::string creation_message() const;
+        void systemcall(const std::string&& message, std::string& placeholder);
     };
 
     mFileSystem* mfs;
@@ -75,6 +77,6 @@ private:
     void recursive_clean_memory(mNode* node);
     void recursive_list(const mNode* const node, std::vector<std::string>& collected, int offset);
     void dirpaths(const std::vector<std::string>& paths, std::vector<std::string>& pathholder);
-    bool create_directory(const std::vector<std::string>& paths, mNode*& nodeholder);
+    bool create_directory(const std::vector<std::string>& paths, mNode*& nodeholder, std::string& placeholder);
 };
 #endif

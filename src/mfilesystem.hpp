@@ -15,12 +15,12 @@ class mSystemTree;
 class mFileSystem : public mSystem
 {
 public:
+    mServer* owner;
     mFileSystem(mServer* owner);
     void run_command_line(const std::vector<std::string>& argv, std::string& placeholder);
     ~mFileSystem();
 
 private:
-    mServer* owner;
     mSystemTree* systemtree;
 
     void pwd(const std::vector<std::string>& argv, std::string& placeholder);
