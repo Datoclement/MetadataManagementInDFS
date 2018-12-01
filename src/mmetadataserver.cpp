@@ -7,8 +7,17 @@
 
 using namespace std;
 
-mMetadataServer::mMetadataServer()
+mMetadataServer::mMetadataServer():metadata_map()
 {}
+
+mMetadataServer::~mMetadataServer()
+{
+    for (auto it = metadata_map.begin(); it != metadata_map.end(); it++)
+    {
+        delete it->second;
+        metadata_map.erase(it);
+    }
+}
 
 void mMetadataServer::hi(const vector<string>& argv, string& placeholder)
 {
@@ -26,9 +35,129 @@ void mMetadataServer::run_command_line(const vector<string>& argv, string& place
     {
         this->hi(argv, placeholder);
     }
+    else if (command == "request")
+    {
+       this->request(argv, placeholder);
+    }
+    else if (command == "delete")
+    {
+        this->remove(argv, placeholder);
+    }
+    else if (command == "create")
+    {
+      this->create(argv, placeholder);
+    }
+    else if (command == "update")
+    {
+        this->update(argv, placeholder);
+    }
     else
     {
         placeholder = "Error: command " + command + " is not supported.\n";
     }
+}
 
+void mMetadataServer::request(const std::vector<std::string>& argv, std::string& placeholder)
+{
+    if (argv.size() != 2)
+    {
+        placeholder = "Error: wrong argument number for request.\n";
+        return;
+    }
+    int id = atoi(argv[1].c_str());
+    auto it = metadata_map.find(id);
+    if (it == metadata_map.end())
+    {
+        placeholder = "Error: request failed.\n";
+        return;
+    }
+    placeholder = it->second->summary();
+    placeholder = "Success";
+}
+
+void mMetadataServer::remove(const std::vector<std::string>& argv, std::string& placeholder)
+{
+    if (argv.size() != 2)
+
+    {
+        placeholder = "Error: wrong argument number for delete.\n";
+        return;
+    }
+    int
+
+    id = atoi(argv[1].c_str());
+    auto it = metadata_map.find(id);
+    if (it == metadata_map.end())
+    {
+        placeholder = "Error: delete failed.\n";
+        return;
+    }
+    delete it->second;
+    metadata_map.erase(it);
+    placeholder = "Success";
+}
+
+void mMetadataServer::create(const std::vector<std::string>& argv, std::string& placeholder)
+{
+    if (argv.size() != 8)
+    {
+        placeholder = "Error: wrong argument number for delete.\n";
+        return;
+    }
+    int id = atoi(argv[1].c_str());
+    int parent = atoi(argv[2].c_str());
+    const std::string& creation_time = argv[3];
+    const std::string& lastmodify_time = argv[4];
+    size_t size = atoi(argv[5].c_str());
+    const std::string& name = argv[6];
+    const int type = atoi(argv[7].c_str());
+    mMetadata* new_metadata = new mMetadata(id, parent, creation_time, size,
+                                            lastmodify_time, name, type);
+    auto it = metadata_map.find(id);
+    if (it != metadata_map.end())
+    {
+        placeholder = "Error: file id already exists.";
+        return;
+    }
+    metadata_map.insert(std::pair<int, mMetadata*>(id, new_metadata));
+    placeholder = "Success";
+}
+
+void mMetadataServer::update(const std::vector<std::string>& argv, std::string& placeholder)
+{
+    if ((argv.size() - 1) % 2 != 0)
+    {
+        placeholder = "Error: uncomplete key value pairs.\n";
+        return;
+    }
+    int id = atoi(argv[0].c_str());
+    auto it = metadata_map.find(id);
+    if (it == metadata_map.end())
+    {
+        placeholder = "Error: file id doesn't exist.";
+        return;
+    }
+    mMetadata* metadata = metadata_map[id];
+    for (int i = 1; i < argv.size(); i+=2)
+    {
+
+        if (argv[i] == "parent")
+        {
+            metadata->updata_parent(atoi(argv[i+i].c_str()));
+        }
+        else if (argv[i] == "lastmodify_time")
+        {
+            metadata->update_lastmodify_time(argv[i+1]);
+        }
+        else if (argv[i] == "name")
+        {
+            metadata->update_name(argv[i+1]);
+        }
+        else
+        {
+            placeholder = "Error: unknown key value.";
+            return;
+        }
+        placeholder = "Success";
+    }
 }

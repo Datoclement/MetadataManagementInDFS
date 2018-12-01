@@ -3,6 +3,9 @@
 
 #include <string>
 #include <vector>
+#include <map>
+#include "mmetadata.hpp"
+
 
 #include "msystem.hpp"
 
@@ -10,9 +13,15 @@ class mMetadataServer : public mSystem
 {
 public:
     mMetadataServer();
+    ~mMetadataServer();
     void run_command_line(const std::vector<std::string>& argv, std::string& placeholder);
+private:
+    std::map<int, mMetadata*> metadata_map;
     void hi(const std::vector<std::string>& argv, std::string& placeholder);
-
+    void request(const std::vector<std::string>& argv, std::string& placeholder);
+    void remove(const std::vector<std::string>& argv, std::string& placeholder);
+    void create(const std::vector<std::string>& argv, std::string& placeholder);
+    void update(const std::vector<std::string>& argv, std::string& placeholder);
 };
 
 #endif
