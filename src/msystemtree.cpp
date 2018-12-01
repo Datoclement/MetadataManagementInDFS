@@ -42,10 +42,11 @@ mSystemTree::mNode::mNode(mSystemTree* mst, mNode* parent, const string name, co
     this->_parent = parent;
     this->_name = name;
     this->_size = size;
-    this->systemcall(this->creation_message(), placeholder);
+    string creation_msg = this->creation_message();
+    this->systemcall(creation_msg, placeholder);
 }
 
-void mSystemTree::mNode::systemcall(const string&& message, string& placeholder)
+void mSystemTree::mNode::systemcall(const string& message, string& placeholder) const
 {
     if (this->_object_id == 0)
     {
@@ -236,15 +237,10 @@ const int mSystemTree::mNode::object_id() const
     return this->_object_id;
 }
 
-string mSystemTree::mNode::asstring() const
+void mSystemTree::mNode::asstring(string& placeholder) const
 {
-    string str;
-    str += "object id: " + to_string(this->_object_id) + "\n";
-    str += "created at: " + string(ctime(&this->_creation_time));
-    str += "last modified at: " + string(ctime(&this->_modification_time));
-    str += "type: " + string(this->_is_file?"file":"directory") + "\n";
-    str += "size: " + to_string(this->_size) + "\n";
-    return str;
+    string str = "request " + to_string(this->_object_id);
+    this->systemcall(str, placeholder);
 }
 
 void mSystemTree::get_working_directory(string& placeholder)
@@ -411,7 +407,7 @@ void mSystemTree::state(const string& path, string& placeholder)
     mNode* dest_node = nullptr;
     if (this->valid_path(paths, this->current_node, dest_node))
     {
-        placeholder = dest_node->asstring();
+        dest_node->asstring(placeholder);
     }
     else
     {

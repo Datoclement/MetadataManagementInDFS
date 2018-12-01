@@ -45,7 +45,7 @@ private:
         const std::vector<mNode*>& children() const;
         const int object_id() const;
         bool is_file() const;
-        std::string asstring() const;
+        void asstring(std::string& placeholder) const;
 
     private:
 
@@ -67,7 +67,7 @@ private:
         void attachto(mNode* new_parent);
         void update();
         std::string creation_message() const;
-        void systemcall(const std::string&& message, std::string& placeholder);
+        void systemcall(const std::string& message, std::string& placeholder) const;
     };
 
     mFileSystem* mfs;
