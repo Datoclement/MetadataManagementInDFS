@@ -8,7 +8,9 @@
 
 using namespace std;
 
-mMDTLogicSystem::mMDTLogicSystem():metadata_map()
+mMDTLogicSystem::mMDTLogicSystem(mServer* owner):
+    metadata_map(),
+    owner(owner)
 {}
 
 mMDTLogicSystem::~mMDTLogicSystem()
@@ -23,6 +25,24 @@ mMDTLogicSystem::~mMDTLogicSystem()
 void mMDTLogicSystem::hi(const vector<string>& argv, string& placeholder)
 {
     placeholder = "hi";
+}
+
+void mMDTLogicSystem::pushto(const vector<string>& argv, string& placeholder)
+{
+    placeholder = "Success";
+    string ip = argv[1];
+    int port = atoi(argv[2].c_str());
+    for (auto it=metadata_map.begin();it!=metadata_map.end();it++)
+    {
+        string line;
+        string message = "create " + it->second->summary();
+        this->owner->sendto(ip, port, message, line);
+        if (line != "Success"
+         && line != "Error: file id already exists.")
+        {
+            placeholder = "Failure";
+        }
+    }
 }
 
 void mMDTLogicSystem::run_command_line(const vector<string>& argv, string& placeholder)
@@ -51,6 +71,10 @@ void mMDTLogicSystem::run_command_line(const vector<string>& argv, string& place
     else if (command == "update")
     {
         this->update(argv, placeholder);
+    }
+    else if (command == "pushto")
+    {
+        this->pushto(argv, placeholder);
     }
     else
     {

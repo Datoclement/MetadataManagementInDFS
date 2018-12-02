@@ -117,7 +117,6 @@ void mServer::initialize_master()
         std::string line;
         while (true)
         {
-            std::cout << "ip port " << ip << " " << port << std::endl;
             if (this->connections.back()->writedown(message)
              && this->connections.back()->readin(line))
             {
@@ -145,7 +144,7 @@ void mServer::run()
     }
     else
     {
-        mSystem* mms = new mMDTLogicSystem();
+        mSystem* mms = new mMDTLogicSystem(this);
         this->establish_service(mms);
     }
 }
@@ -180,6 +179,57 @@ void mServer::establish_service(mSystem* sys)
     }
 }
 
+void mServer::connectto(int sid)
+{
+    std::string ip = this->slave_table[sid][0];
+    int port = atoi(this->slave_table[sid][1].c_str());
+    this->connections[sid] = new mClientConnection(ip, port);
+}
+
+bool mServer::synchronize_data(int src, int dst)
+{
+    std::string message = "pushto " + this->slave_table[dst][0] + " " + this->slave_table[dst][1];
+    std::vector<int> slaveidarr; slaveidarr.push_back(src);
+    std::string line;
+    delete this->connections[dst];
+    this->sendto(slaveidarr, message, line);
+    this->connectto(dst);
+    std::vector<std::string> lines;
+    tokenize(line, lines, "\n");
+    std::vector<std::string> tokens;
+    tokenize(lines[1], tokens);
+    return tokens.size() == 3 && tokens[2] == "Success";
+}
+
+bool mServer::recover(int id)
+{
+    int cnt = 0;
+    for (int i=1;i<this->numslaves;i++)
+    {
+        int sid = (id+1) % this->numslaves;
+        if (this->connecteds[sid] && this->synchronize_data(sid, id))
+        {
+            cnt++;
+            if (cnt >= 2)
+            {
+                break;
+            }
+        }
+    }
+    return (cnt >= 2) || ((cnt == 1) && this->numslaves == 2);
+}
+
+void mServer::sendto(const std::string& IP, int port, const std::string& message, std::string& placeholder)
+{
+    mClientConnection con(IP, port);
+    std::string line;
+    if (!con.writedown(message)
+     || !con.readin(placeholder))
+    {
+        placeholder = "Failure";
+    }
+}
+
 void mServer::sendto(const std::vector<int>& slaveids, const string& message, string& feedback)
 {
     vector<string> responses;
@@ -194,25 +244,31 @@ void mServer::sendto(const std::vector<int>& slaveids, const string& message, st
             responses.push_back("");
             feedback += to_string(sid) + "-th slave " + slstr + " is still dead\n";
         }
-        else
-        if (this->connections[sid]->writedown(message)
+        else if (this->replacements[sid])
+        {
+            responses.push_back("");
+            delete this->connections[sid];
+            this->connectto(sid);
+            if (!this->recover(sid))
+            {
+                feedback += to_string(sid) + "-th slave " + slstr + " recovery failed\n";
+                flush("Successful connection but failed recovery to " + slstr + ".");
+            }
+            else
+            {
+                this->connecteds[sid] = true;
+                this->replacements[sid] = false;
+
+                feedback += to_string(sid) + "-th slave " + slstr + " finds a replacement\n";
+                flush("Successful connection and recovery to " + slstr + ".");
+            }
+        }
+        else if (this->connections[sid]->writedown(message)
          && this->connections[sid]->readin(line))
         {
             responses.push_back(line);
             feedback += to_string(sid) + "-th slave " + slstr + " responds: " + line + "\n";
             flush("in from " + slstr + ": " + line);
-        }
-        else if (this->replacements[sid])
-        {
-            responses.push_back("");
-            delete this->connections[sid];
-            std::string ip = this->slave_table[sid][0];
-            int port = atoi(this->slave_table[sid][1].c_str());
-            this->connections[sid] = new mClientConnection(ip, port);
-            this->connecteds[sid] = true;
-            this->replacements[sid] = false;
-            feedback += to_string(sid) + "-th slave " + slstr + " finds a replacement\n";
-            flush("Build connection to " + slstr + ".");
         }
         else
         {
@@ -264,11 +320,19 @@ string mServer::slave_str(int id)
 
 void mServer::slavehash(int identifier, std::vector<int>& slaveholder)
 {
-    int residu = identifier % this->numslaves;
-    for (int i=0;i<this->numslaves;i++)
+    if (this->numslaves == 2)
     {
-        if (residu != i)
-        slaveholder.push_back(i);
+        slaveholder.push_back(0);
+        slaveholder.push_back(1);
+    }
+    else
+    {
+        int residu = identifier % this->numslaves;
+        for (int i=0;i<this->numslaves;i++)
+        {
+            if (residu != i)
+            slaveholder.push_back(i);
+        }
     }
 }
 

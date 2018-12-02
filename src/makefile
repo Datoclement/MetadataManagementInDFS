@@ -41,7 +41,7 @@ goldenipcode.o: goldenipcode.cpp goldenipcode.hpp
 mserver.o: mserver.cpp mserver.hpp mmdtlogicsystem.hpp mconnection.hpp api.hpp mmdslogicsystem.hpp mmdtlogicsystem.hpp merror.hpp
 	g++ ${CFLAG} mserver.cpp -c -o mserver.o
 
-mmdtlogicsystem.o: mmdtlogicsystem.cpp mmdtlogicsystem.hpp merror.hpp msystem.hpp mmetadata.hpp
+mmdtlogicsystem.o: mmdtlogicsystem.cpp mmdtlogicsystem.hpp merror.hpp msystem.hpp mmetadata.hpp mserver.hpp
 	g++ ${CFLAG} mmdtlogicsystem.cpp -c -o mmdtlogicsystem.o
 
 clean: 

@@ -21,6 +21,7 @@ public:
     void port_replacement(const std::vector<std::string>& argv, std::string& placeholder);
     void sendto(const std::vector<int>& slaveids, const std::string& message, std::string& feedback);
     void slavehash(int identifier, std::vector<int>& slaveholder);
+    void sendto(const std::string& IP, int port, const std::string& message, std::string& placeholder);
 
 private:
     mServerConnection* scon;
@@ -40,6 +41,9 @@ private:
     void initialize_slave();
     void establish_service(mSystem* msystem);
     std::string slave_str(int id);
+    void connectto(int sid);
+    bool recover(int id);
+    bool synchronize_data(int src, int dst);
 };
 
 #endif
