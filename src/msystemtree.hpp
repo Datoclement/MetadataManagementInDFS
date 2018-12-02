@@ -2,17 +2,17 @@
 #define MSYSTEMTREE_HPP
 
 #include "msystemtree.hpp"
-#include "mfilesystem.hpp"
+#include "mmdslogicsystem.hpp"
 
 #include <vector>
 #include <string>
 
-class mFileSystem;
+class mMDSLogicSystem;
 
 class mSystemTree
 {
 public:
-    mSystemTree(mFileSystem* mfs);
+    mSystemTree(mMDSLogicSystem* mfs);
     ~mSystemTree();
     void get_working_directory(std::string& placeholder);
     void make_directory(const std::string& path, std::string& placeholder);
@@ -53,9 +53,6 @@ private:
 
         mSystemTree* const mst;
         const int _object_id;
-        const time_t _creation_time;
-        int _size;
-        time_t _modification_time;
 
         std::string _name;
         const bool _is_file;
@@ -71,7 +68,7 @@ private:
         void systemcall(const std::string& message, std::string& placeholder) const;
     };
 
-    mFileSystem* mfs;
+    mMDSLogicSystem* mfs;
     mNode* root;
     mNode* current_node;
     bool valid_path(const std::vector<std::string>& paths, mNode* src, mNode*& dest);

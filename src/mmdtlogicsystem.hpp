@@ -4,16 +4,15 @@
 #include <string>
 #include <vector>
 #include <map>
+
 #include "mmetadata.hpp"
-
-
 #include "msystem.hpp"
 
-class mMetadataServer : public mSystem
+class mMDTLogicSystem : public mSystem
 {
 public:
-    mMetadataServer();
-    ~mMetadataServer();
+    mMDTLogicSystem();
+    ~mMDTLogicSystem();
     void run_command_line(const std::vector<std::string>& argv, std::string& placeholder);
 private:
     std::map<int, mMetadata*> metadata_map;

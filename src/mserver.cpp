@@ -1,8 +1,8 @@
 #include "mserver.hpp"
 #include "mconnection.hpp"
 #include "api.hpp"
-#include "mfilesystem.hpp"
-#include "mmetadataserver.hpp"
+#include "mmdslogicsystem.hpp"
+#include "mmdtlogicsystem.hpp"
 #include "merror.hpp"
 
 #include <string>
@@ -140,12 +140,12 @@ void mServer::run()
 {
     if (this->is_master)
     {
-        mSystem* mfs = new mFileSystem(this);
-        this->establish_service(mfs);
+        mSystem* mds = new mMDSLogicSystem(this);
+        this->establish_service(mds);
     }
     else
     {
-        mSystem* mms = new mMetadataServer();
+        mSystem* mms = new mMDTLogicSystem();
         this->establish_service(mms);
     }
 }
@@ -191,6 +191,7 @@ void mServer::sendto(const std::vector<int>& slaveids, const string& message, st
         flush("out to " + slstr + ": " + message);
         if (!this->connecteds[sid] && !this->replacements[sid])
         {
+            responses.push_back("");
             feedback += to_string(sid) + "-th slave " + slstr + " is still dead\n";
         }
         else
@@ -203,6 +204,7 @@ void mServer::sendto(const std::vector<int>& slaveids, const string& message, st
         }
         else if (this->replacements[sid])
         {
+            responses.push_back("");
             delete this->connections[sid];
             std::string ip = this->slave_table[sid][0];
             int port = atoi(this->slave_table[sid][1].c_str());
@@ -214,11 +216,32 @@ void mServer::sendto(const std::vector<int>& slaveids, const string& message, st
         }
         else
         {
+            responses.push_back("");
             this->connecteds[sid] = false;
             flush("Error: connection to " + slstr + " is lost.");
             feedback += to_string(sid) + "-th slave " + slstr + " has lost the contact.\n";
         }
     }
+
+    string formal_output;
+    for (int i=0;i<slaveids.size();i++)
+    {
+        if (responses[i] == "")
+        {
+            continue;
+        }
+        else
+        {
+            formal_output = responses[i];
+            vector<string> tokens;
+            tokenize(responses[i], tokens);
+            if (tokens[0] != "Error:")
+            {
+                break;
+            }
+        }
+    }
+    feedback += "formal output: " + formal_output + "\n";
 }
 
 void mServer::hislaves(std::string& placeholder)

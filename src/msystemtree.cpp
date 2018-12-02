@@ -5,7 +5,7 @@
 #include "msystemtree.hpp"
 #include "merror.hpp"
 #include "api.hpp"
-#include "mfilesystem.hpp"
+#include "mmdslogicsystem.hpp"
 
 using namespace std;
 
@@ -33,10 +33,8 @@ int mSystemTree::mNode::_node_count = 0;
 mSystemTree::mNode::mNode(mSystemTree* mst, bool is_file):
     mst(mst),
     _object_id(mNode::_node_count++),
-    _is_file(is_file),
-    _creation_time(time(0))
+    _is_file(is_file)
 {
-    this->_modification_time = this->_creation_time;
 }
 
 mSystemTree::mNode::mNode(mSystemTree* mst):
@@ -55,7 +53,6 @@ mSystemTree::mNode::mNode(mSystemTree* mst, mNode* parent, const string name, co
     }
     this->_parent = parent;
     this->_name = name;
-    this->_size = size;
     string creation_msg = this->creation_message();
     this->systemcall(creation_msg, placeholder);
 }
@@ -144,7 +141,7 @@ void mSystemTree::mNode::moveto(const string& name, mNode*& dest)
     }
 }
 
-mSystemTree::mSystemTree(mFileSystem* mfs):
+mSystemTree::mSystemTree(mMDSLogicSystem* mfs):
     mfs(mfs)
 {
     this->root = new mNode(this);
@@ -186,7 +183,6 @@ bool mSystemTree::mNode::is_file() const
 
 void mSystemTree::mNode::reattachto(mNode* new_parent, string& placeholder)
 {
-    this->update();
     this->detach();
     this->attachto(new_parent);
     string message = this->update_message("parent", to_string(new_parent->_object_id));
@@ -199,7 +195,6 @@ mSystemTree::mNode* const& mSystemTree::mNode::addchild(const string& name, cons
     {
         error("Error: this should never be a file. debug it.\n");
     }
-    this->update();
     mNode* child = new mNode(this->mst, this, name, is_file, size, placeholder);
     this->_children.push_back(child);
     return this->_children.back();
@@ -207,7 +202,6 @@ mSystemTree::mNode* const& mSystemTree::mNode::addchild(const string& name, cons
 
 void mSystemTree::mNode::setname(const string& name, string& placeholder)
 {
-    this->update();
     this->_name = name;
     string message = this->update_message("name", name);
     this->systemcall(message, placeholder);
@@ -215,7 +209,6 @@ void mSystemTree::mNode::setname(const string& name, string& placeholder)
 
 void mSystemTree::mNode::releasechild(int i, string& placeholder)
 {
-    this->update();
     string message = "delete " + to_string(this->_children[i]->_object_id);
     this->_children[i]->systemcall(message, placeholder);
     delete this->_children[i];
@@ -242,15 +235,9 @@ string mSystemTree::mNode::update_message(const string& key, const string& value
 
 void mSystemTree::mNode::updatenothing(string& placeholder)
 {
-    this->update();
     string timestr = gettimestr();
     string message = this->update_message("lastmodify_time", timestr);
     this->systemcall(message, placeholder);
-}
-
-void mSystemTree::mNode::update()
-{
-    this->_modification_time = time(0);
 }
 
 const int mSystemTree::mNode::object_id() const

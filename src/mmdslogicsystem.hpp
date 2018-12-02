@@ -12,13 +12,13 @@
 
 class mSystemTree;
 
-class mFileSystem : public mSystem
+class mMDSLogicSystem : public mSystem
 {
 public:
     mServer* owner;
-    mFileSystem(mServer* owner);
+    mMDSLogicSystem(mServer* owner);
     void run_command_line(const std::vector<std::string>& argv, std::string& placeholder);
-    ~mFileSystem();
+    ~mMDSLogicSystem();
 
 private:
     mSystemTree* systemtree;

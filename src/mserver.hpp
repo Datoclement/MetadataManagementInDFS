@@ -7,10 +7,6 @@
 #include "mconnection.hpp"
 #include "msystem.hpp"
 
-// ^^^^TODO
-// make master server maintaining a list of connection with slaves
-// make an interface to facilitate the one-time send message
-
 class mServer
 {
 public:

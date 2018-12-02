@@ -1,4 +1,4 @@
-#include "mmetadataserver.hpp"
+#include "mmdtlogicsystem.hpp"
 #include "merror.hpp"
 #include "msystem.hpp"
 
@@ -8,10 +8,10 @@
 
 using namespace std;
 
-mMetadataServer::mMetadataServer():metadata_map()
+mMDTLogicSystem::mMDTLogicSystem():metadata_map()
 {}
 
-mMetadataServer::~mMetadataServer()
+mMDTLogicSystem::~mMDTLogicSystem()
 {
     for (auto it = metadata_map.begin(); it != metadata_map.end(); it++)
     {
@@ -20,12 +20,12 @@ mMetadataServer::~mMetadataServer()
     }
 }
 
-void mMetadataServer::hi(const vector<string>& argv, string& placeholder)
+void mMDTLogicSystem::hi(const vector<string>& argv, string& placeholder)
 {
     placeholder = "hi";
 }
 
-void mMetadataServer::run_command_line(const vector<string>& argv, string& placeholder)
+void mMDTLogicSystem::run_command_line(const vector<string>& argv, string& placeholder)
 {
     if (argv.size() == 0)
     {
@@ -63,7 +63,7 @@ void mMetadataServer::run_command_line(const vector<string>& argv, string& place
     }
 }
 
-void mMetadataServer::request(const std::vector<std::string>& argv, std::string& placeholder)
+void mMDTLogicSystem::request(const std::vector<std::string>& argv, std::string& placeholder)
 {
     if (argv.size() != 2)
     {
@@ -80,7 +80,7 @@ void mMetadataServer::request(const std::vector<std::string>& argv, std::string&
     placeholder = it->second->summary();
 }
 
-void mMetadataServer::remove(const std::vector<std::string>& argv, std::string& placeholder)
+void mMDTLogicSystem::remove(const std::vector<std::string>& argv, std::string& placeholder)
 {
     if (argv.size() != 2)
 
@@ -102,7 +102,7 @@ void mMetadataServer::remove(const std::vector<std::string>& argv, std::string& 
     placeholder = "Success";
 }
 
-void mMetadataServer::create(const std::vector<std::string>& argv, std::string& placeholder)
+void mMDTLogicSystem::create(const std::vector<std::string>& argv, std::string& placeholder)
 {
     if (argv.size() != 8)
     {
@@ -127,7 +127,7 @@ void mMetadataServer::create(const std::vector<std::string>& argv, std::string& 
     placeholder = "Success";
 }
 
-void mMetadataServer::update(const std::vector<std::string>& argv, std::string& placeholder)
+void mMDTLogicSystem::update(const std::vector<std::string>& argv, std::string& placeholder)
 {
     if ((argv.size()) % 2 != 0)
     {

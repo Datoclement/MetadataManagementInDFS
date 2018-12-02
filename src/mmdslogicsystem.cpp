@@ -3,7 +3,7 @@
 #include <string>
 #include <iostream>
 
-#include "mfilesystem.hpp"
+#include "mmdslogicsystem.hpp"
 #include "merror.hpp"
 #include "mserver.hpp"
 #include "msystem.hpp"
@@ -19,23 +19,23 @@ bool is_option_kw(const string& arg)
     return arg[0] == '-';
 }
 
-mFileSystem::mFileSystem(mServer* owner)
+mMDSLogicSystem::mMDSLogicSystem(mServer* owner)
 {
     this->systemtree = new mSystemTree(this);
     this->owner = owner;
 }
 
-mFileSystem::~mFileSystem()
+mMDSLogicSystem::~mMDSLogicSystem()
 {
     delete this->systemtree;
 }
 
-void mFileSystem::pwd(const vector<string>& argv, string& placeholder)
+void mMDSLogicSystem::pwd(const vector<string>& argv, string& placeholder)
 {
     this->systemtree->get_working_directory(placeholder);
 }
 
-void mFileSystem::mkdir(const vector<string>& argv, string& placeholder)
+void mMDSLogicSystem::mkdir(const vector<string>& argv, string& placeholder)
 {
     if (argv.size() < 2)
     {
@@ -48,7 +48,7 @@ void mFileSystem::mkdir(const vector<string>& argv, string& placeholder)
     }
 }
 
-void mFileSystem::ls(const vector<string>&argv, string& placeholder)
+void mMDSLogicSystem::ls(const vector<string>&argv, string& placeholder)
 {
     string src = ".";
     bool recursive = false;
@@ -75,7 +75,7 @@ void mFileSystem::ls(const vector<string>&argv, string& placeholder)
     this->systemtree->list(src, recursive, placeholder);
 }
 
-void mFileSystem::readdir(const vector<string>& argv, string& placeholder)
+void mMDSLogicSystem::readdir(const vector<string>& argv, string& placeholder)
 {
     string src = ".";
     if (argv.size() > 1)
@@ -85,7 +85,7 @@ void mFileSystem::readdir(const vector<string>& argv, string& placeholder)
     this->systemtree->list(argv[1], false, placeholder);
 }
 
-void mFileSystem::cd(const vector<string>& argv, string& placeholder)
+void mMDSLogicSystem::cd(const vector<string>& argv, string& placeholder)
 {
     if (argv.size() == 1)
     {
@@ -97,7 +97,7 @@ void mFileSystem::cd(const vector<string>& argv, string& placeholder)
     }
 }
 
-void mFileSystem::mv(const vector<string>& argv, string& placeholder)
+void mMDSLogicSystem::mv(const vector<string>& argv, string& placeholder)
 {
     if (argv.size() < 3)
     {
@@ -109,7 +109,7 @@ void mFileSystem::mv(const vector<string>& argv, string& placeholder)
     }
 }
 
-void mFileSystem::stat(const vector<string>& argv, string& placeholder)
+void mMDSLogicSystem::stat(const vector<string>& argv, string& placeholder)
 {
     if (argv.size() == 1)
     {
@@ -121,7 +121,7 @@ void mFileSystem::stat(const vector<string>& argv, string& placeholder)
     }
 }
 
-void mFileSystem::touch(const vector<string>& argv, string& placeholder)
+void mMDSLogicSystem::touch(const vector<string>& argv, string& placeholder)
 {
     if (argv.size() == 1)
     {
@@ -133,7 +133,7 @@ void mFileSystem::touch(const vector<string>& argv, string& placeholder)
     }
 }
 
-void mFileSystem::rm(const vector<string>& argv, string& placeholder)
+void mMDSLogicSystem::rm(const vector<string>& argv, string& placeholder)
 {
     string src = "";
     bool recursive = false;
@@ -166,17 +166,17 @@ void mFileSystem::rm(const vector<string>& argv, string& placeholder)
     }
 }
 
-void mFileSystem::checkservers(const vector<string>& argv, string& placeholder)
+void mMDSLogicSystem::checkservers(const vector<string>& argv, string& placeholder)
 {
     this->owner->hislaves(placeholder);
 }
 
-void mFileSystem::port(const vector<string>& argv, string& placeholder)
+void mMDSLogicSystem::port(const vector<string>& argv, string& placeholder)
 {
     this->owner->port_replacement(argv, placeholder);
 }
 
-void mFileSystem::run_command_line(const vector<string>& argv, string& placeholder)
+void mMDSLogicSystem::run_command_line(const vector<string>& argv, string& placeholder)
 {
     if (argv.size() == 0)
     {
